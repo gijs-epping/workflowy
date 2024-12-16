@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Workflowy Daily Page</title>
+    <link rel="stylesheet" href="/popup/popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <h1>Workflowy Daily Page</h1>
+        
+        <div class="settings-section">
+            <h2>Settings</h2>
+            <div class="setting-item">
+                <label for="autoExpand">Auto-expand daily nodes:</label>
+                <input type="checkbox" id="autoExpand" checked>
+            </div>
+            <div class="setting-item">
+                <label for="defaultView">Default view:</label>
+                <select id="defaultView">
+                    <option value="today">Today</option>
+                    <option value="last">Last viewed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <button id="toggleView" class="primary-button">Toggle Daily View</button>
+            <button id="refreshView" class="secondary-button">Refresh View</button>
+        </div>
+
+        <div class="status-section">
+            <p>Status: <span id="status">Active</span></p>
+            <p class="version">Version 1.0.0</p>
+        </div>
+    </div>
+    <script src="/popup/popup.js"></script>
+</body>
+</html>
