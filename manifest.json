@@ -3,11 +3,15 @@
   "name": "Workflowy Daily Page",
   "version": "1.0.0",
   "description": "Adds daily page functionality to Workflowy with a two-pane layout",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": [
     "activeTab",
-    "scripting",
-    "storage",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "https://workflowy.com/*"
@@ -16,10 +20,7 @@
     {
       "matches": ["https://workflowy.com/*"],
       "css": ["content/content.css"],
-      "js": ["content/content.js"],
-      "run_at": "document_idle",
-      "all_frames": false,
-      "match_about_blank": false
+      "js": ["content/content.js"]
     }
   ],
   "background": {
@@ -27,6 +28,11 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Workflowy Daily Page"
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   }
 }

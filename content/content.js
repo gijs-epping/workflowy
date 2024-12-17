@@ -11,7 +11,6 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
         }
 
         constructor() {
-            // Prevent multiple instantiation
             if (WorkflowyDailyPage.instance) {
                 return WorkflowyDailyPage.instance;
             }
@@ -20,24 +19,24 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             this.container = null;
             this.leftPane = null;
             this.rightPane = null;
-            this.dateSelector = null;
+            this.header = null;
             this.currentUrl = window.location.href;
             this.leftIframe = null;
             this.rightIframe = null;
             this.isInitialized = false;
+            this.currentDate = new Date();
+            this.retryAttempts = 0;
+            this.maxRetries = 10;
+            this.retryDelay = 1000;
 
             WorkflowyDailyPage.instance = this;
-            console.warn('WorkflowyDailyPage: Constructor initialized', this.instanceId);
         }
 
-        init() {
-            // Check if already initialized
+        async init() {
             if (document.querySelector(`[data-instance-id="${this.instanceId}"]`)) {
-                console.warn('WorkflowyDailyPage: Already initialized', this.instanceId);
                 return;
             }
 
-            console.warn('WorkflowyDailyPage: Init called', this.instanceId);
             this.cleanup();
             
             if (document.readyState === 'loading') {
@@ -48,28 +47,36 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
         }
 
         cleanup() {
-            // Remove any existing instances
-            document.querySelectorAll('.workflowy-daily-container, .workflowy-daily-date-selector').forEach(el => {
-                console.warn('WorkflowyDailyPage: Removing existing element', el.className);
+            document.querySelectorAll('.workflowy-daily-container, .workflowy-daily-header').forEach(el => {
                 el.remove();
             });
         }
 
-        setup() {
-            if (this.isInitialized) {
-                console.warn('WorkflowyDailyPage: Already set up', this.instanceId);
-                return;
-            }
+        async setup() {
+            if (this.isInitialized) return;
 
-            console.warn('WorkflowyDailyPage: Setting up', this.instanceId);
-            this.isInitialized = true;
-            this.createLayout();
-            this.setupDateSelector();
+            try {
+                // Initialize session through background script
+                const response = await this.sendMessage({ type: 'INITIALIZE_SESSION' });
+                if (!response.success) {
+                    throw new Error('Failed to initialize session');
+                }
+
+                this.isInitialized = true;
+                this.createLayout();
+                this.createHeader();
+            } catch (error) {
+                console.error('Setup failed:', error);
+            }
+        }
+
+        sendMessage(message) {
+            return new Promise((resolve) => {
+                chrome.runtime.sendMessage(message, resolve);
+            });
         }
 
         createLayout() {
-            console.warn('WorkflowyDailyPage: Creating layout', this.instanceId);
-            
             this.container = document.createElement('div');
             this.container.className = 'workflowy-daily-container';
             this.container.setAttribute('data-instance-id', this.instanceId);
@@ -78,12 +85,6 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             this.leftPane = document.createElement('div');
             this.leftPane.className = 'workflowy-daily-pane';
             this.leftIframe = document.createElement('iframe');
-            
-            this.leftIframe.addEventListener('load', () => {
-                console.warn('WorkflowyDailyPage: Left iframe loaded', this.instanceId);
-                this.initializeIframeContent();
-            });
-            
             this.leftIframe.src = this.currentUrl;
             this.leftPane.appendChild(this.leftIframe);
 
@@ -99,124 +100,122 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             document.body.appendChild(this.container);
         }
 
-        setupDateSelector() {
-            console.warn('WorkflowyDailyPage: Setting up date selector', this.instanceId);
+        createHeader() {
+            this.header = document.createElement('div');
+            this.header.className = 'workflowy-daily-header';
+            this.header.setAttribute('data-instance-id', this.instanceId);
+
+            this.header.innerHTML = `
+                <div class="daily-calendar">
+                    <button class="daily-nav-arrow prev">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="daily-date-grid"></div>
+                    <button class="daily-nav-arrow next">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            // Add event listeners
+            this.header.querySelector('.daily-nav-arrow.prev').addEventListener('click', () => this.navigateWeek(-1));
+            this.header.querySelector('.daily-nav-arrow.next').addEventListener('click', () => this.navigateWeek(1));
             
-            this.dateSelector = document.createElement('div');
-            this.dateSelector.className = 'workflowy-daily-date-selector';
-            this.dateSelector.setAttribute('data-instance-id', this.instanceId);
-
-            const dateInput = document.createElement('input');
-            dateInput.type = 'date';
-            dateInput.value = this.getCurrentDate();
-            dateInput.addEventListener('change', (e) => {
-                console.warn('Date changed:', e.target.value, this.instanceId);
-                this.handleDateChange(e.target.value);
-            });
-
-            this.dateSelector.appendChild(dateInput);
-            document.body.appendChild(this.dateSelector);
+            document.body.appendChild(this.header);
+            this.updateDateGrid();
         }
 
-        getCurrentDate() {
-            const now = new Date();
-            return now.toISOString().split('T')[0];
-        }
+        updateDateGrid() {
+            const grid = this.header.querySelector('.daily-date-grid');
+            grid.innerHTML = '';
 
-        initializeIframeContent() {
-            console.warn('WorkflowyDailyPage: Initializing iframe content', this.instanceId);
+            // Get Monday of the current week
+            const startOfWeek = new Date(this.currentDate);
+            startOfWeek.setDate(this.currentDate.getDate() - this.currentDate.getDay() + 1);
+
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             
-            try {
-                const iframeDoc = this.leftIframe.contentDocument || 
-                                (this.leftIframe.contentWindow && this.leftIframe.contentWindow.document);
-                
-                if (!iframeDoc || !iframeDoc.body) {
-                    console.warn('Iframe document not ready', this.instanceId);
-                    return;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+
+                const cell = document.createElement('div');
+                cell.className = 'daily-date-cell';
+                if (this.isSameDay(date, this.currentDate)) {
+                    cell.classList.add('active');
                 }
 
-                const observer = new MutationObserver((mutations) => {
-                    console.warn('WorkflowyDailyPage: Content changed', this.instanceId);
-                    this.debugDOM(iframeDoc);
-                });
+                cell.innerHTML = `
+                    <div class="day">${days[i]}</div>
+                    <div class="date">${date.getDate()}</div>
+                `;
 
-                observer.observe(iframeDoc.body, {
-                    childList: true,
-                    subtree: true
-                });
-
-                this.debugDOM(iframeDoc);
-
-                const dateInput = this.dateSelector.querySelector('input[type="date"]');
-                if (dateInput) {
-                    this.handleDateChange(dateInput.value);
-                }
-            } catch (error) {
-                console.warn('Error initializing iframe content:', error, this.instanceId);
+                cell.addEventListener('click', () => this.handleDateClick(date));
+                grid.appendChild(cell);
             }
         }
 
-        debugDOM(doc) {
-            if (!doc) return;
-            
-            const timeElements = doc.querySelectorAll('time[data-monolith]');
-            console.warn(`Found ${timeElements.length} time elements`, this.instanceId);
-            
-            timeElements.forEach((el, index) => {
-                const projectEl = el.closest('.project');
-                const bulletLink = projectEl ? projectEl.querySelector('.bullet') : null;
-                
-                console.warn(`Time element ${index + 1}:`, {
-                    year: el.getAttribute('startyear'),
-                    month: el.getAttribute('startmonth'),
-                    day: el.getAttribute('startday'),
-                    projectId: projectEl ? projectEl.getAttribute('projectid') : null,
-                    bulletHref: bulletLink ? bulletLink.getAttribute('href') : null
-                });
-            });
+        navigateWeek(direction) {
+            const newDate = new Date(this.currentDate);
+            newDate.setDate(this.currentDate.getDate() + (direction * 7));
+            this.currentDate = newDate;
+            this.updateDateGrid();
+            this.handleDateChange(this.currentDate);
         }
 
-        handleDateChange(dateStr) {
-            console.warn('Handling date change:', dateStr, this.instanceId);
-            
+        handleDateClick(date) {
+            console.log('Date clicked:', date);
+            this.currentDate = date;
+            this.updateDateGrid();
+            this.handleDateChange(date);
+        }
+
+        isSameDay(date1, date2) {
+            return date1.getDate() === date2.getDate() &&
+                   date1.getMonth() === date2.getMonth() &&
+                   date1.getFullYear() === date2.getFullYear();
+        }
+
+        async handleDateChange(date) {
             try {
-                const date = new Date(dateStr);
                 const year = date.getFullYear();
                 const month = date.getMonth() + 1;
                 const day = date.getDate();
 
-                if (!this.leftIframe || !this.leftIframe.contentDocument) {
-                    console.warn('Iframe not ready yet', this.instanceId);
-                    return;
-                }
+                console.log('Handling date change:', { year, month, day });
 
-                const iframeDoc = this.leftIframe.contentDocument;
-                const dateElement = iframeDoc.querySelector(
-                    `time[data-monolith][startyear="${year}"][startmonth="${month}"][startday="${day}"]`
-                );
+                // Refresh tree data
+                await this.sendMessage({ type: 'REFRESH_TREE_DATA' });
 
-                if (dateElement) {
-                    const projectElement = dateElement.closest('.project');
-                    if (projectElement) {
-                        const bulletLink = projectElement.querySelector('.bullet');
-                        if (bulletLink) {
-                            const href = bulletLink.getAttribute('href');
-                            if (href && this.rightIframe) {
-                                const fullUrl = `https://workflowy.com${href}`;
-                                console.warn('Navigating to:', fullUrl, this.instanceId);
-                                this.rightIframe.src = fullUrl;
-                            }
-                        }
+                // Find date node
+                const response = await this.sendMessage({
+                    type: 'FIND_DATE_NODE',
+                    year,
+                    month,
+                    day
+                });
+
+                if (response.success && response.node) {
+                    console.log('Found date node:', response.node);
+                    const nodeUrl = `https://workflowy.com/#/${response.node.id}`;
+                    console.log('Navigating to:', nodeUrl);
+                    if (this.rightIframe) {
+                        this.rightIframe.src = nodeUrl;
                     }
+                } else {
+                    console.log('No date node found for:', { year, month, day });
                 }
             } catch (error) {
-                console.warn('Error in handleDateChange:', error, this.instanceId);
+                console.error('Error in handleDateChange:', error);
             }
         }
     }
 
     // Initialize the extension
-    console.warn('Starting Workflowy Daily Page extension');
     const workflowyDaily = WorkflowyDailyPage.getInstance();
     workflowyDaily.init();
 }

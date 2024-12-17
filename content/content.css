@@ -26,32 +26,96 @@
     background: white;
 }
 
-.workflowy-daily-date-selector {
+/* Header styles */
+.workflowy-daily-header {
     position: fixed;
-    top: 10px;
-    right: 20px;
-    z-index: 1001;
+    top: 0;
+    right: 0;
+    width: 50%;
     background: white;
     padding: 8px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1001;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    border-bottom: 1px solid #e0e0e0;
+    height: 54px;
+    box-sizing: border-box;
 }
 
-.workflowy-daily-date-selector input[type="date"] {
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+.daily-calendar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
 }
 
-/* Loading indicator */
-.workflowy-daily-loading {
-    position: absolute;
+/* Navigation arrows */
+.daily-nav-arrow {
+    position: fixed;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: #666;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #6c757d;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    z-index: 1002;
+}
+
+.daily-nav-arrow.prev {
+    right: calc(50% + 8px);
+    transform: translateX(100%) translateY(-50%);
+}
+
+.daily-nav-arrow.next {
+    right: 8px;
+    transform: translateY(-50%);
+}
+
+.daily-nav-arrow:hover {
+    background-color: #f5f5f5;
+}
+
+.daily-date-grid {
+    display: flex;
+    flex-grow: 1;
+    gap: 4px;
+}
+
+.daily-date-cell {
+    flex: 1;
+    text-align: center;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.daily-date-cell:hover {
+    background-color: #f5f5f5;
+}
+
+.daily-date-cell.active {
+    background-color: #e0e0e0;
+}
+
+.daily-date-cell .day {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 2px;
+}
+
+.daily-date-cell .date {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
 }
 
 /* Ensure proper stacking context */

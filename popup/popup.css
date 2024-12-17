@@ -7,112 +7,179 @@
     --text-color: #333333;
     --border-color: #e0e0e0;
     --hover-color: #f5f5f5;
+    --active-color: #edf2ff;
 }
 
 body {
-    width: 300px;
+    width: 900px;
     margin: 0;
-    padding: 16px;
+    padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
 }
 
-.popup-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-h1 {
-    font-size: 18px;
-    margin: 0;
-    padding-bottom: 8px;
+.header {
+    padding: 16px;
     border-bottom: 1px solid var(--border-color);
-    color: var(--primary-color);
 }
 
-h2 {
-    font-size: 14px;
-    margin: 0 0 8px 0;
-}
-
-.settings-section {
+.top-bar {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.setting-item {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
-.setting-item label {
-    font-size: 14px;
-}
-
-.setting-item select {
-    padding: 4px 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--background-color);
-}
-
-.actions-section {
+.date-title {
+    font-size: 20px;
+    font-weight: 600;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 8px;
-    padding: 8px 0;
 }
 
-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.search-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 36px 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+}
+
+.keyboard-hint {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary-color);
+    font-size: 12px;
+    padding: 2px 4px;
+    background-color: var(--hover-color);
+    border-radius: 4px;
+}
+
+.settings-button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-button:hover {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.nav-arrow {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-arrow:hover {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+}
+
+.date-grid {
+    display: flex;
+    flex-grow: 1;
+    gap: 4px;
+}
+
+.date-cell {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.primary-button {
-    background-color: var(--primary-color);
-    color: white;
+.date-cell:hover {
+    background-color: var(--hover-color);
 }
 
-.primary-button:hover {
-    background-color: #2468c5;
+.date-cell.active {
+    background-color: var(--active-color);
+    color: var(--primary-color);
 }
 
-.secondary-button {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.secondary-button:hover {
-    background-color: #5a6268;
-}
-
-.status-section {
+.day {
     font-size: 12px;
     color: var(--secondary-color);
-    border-top: 1px solid var(--border-color);
-    padding-top: 8px;
-    margin-top: 8px;
+    margin-bottom: 4px;
 }
 
-.status-section p {
-    margin: 4px 0;
+.date {
+    font-size: 16px;
+    font-weight: 600;
 }
 
-#status {
+.quick-nav {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.quick-nav-link {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.quick-nav-link:hover {
+    background-color: var(--hover-color);
+}
+
+.quick-nav-link.active {
+    background-color: var(--active-color);
     color: var(--primary-color);
-    font-weight: 500;
 }
 
-.version {
+.current-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.date-icon {
+    display: flex;
+    align-items: center;
     color: var(--secondary-color);
-    font-size: 11px;
 }
