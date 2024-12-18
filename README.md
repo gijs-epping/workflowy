@@ -2,6 +2,10 @@
 
 A Chrome extension that enhances Workflowy with a two-pane layout for efficient daily note management. The extension allows you to view and manage your daily notes alongside your regular Workflowy content.
 
+
+<a href="https://www.buymeacoffee.com/gijseppingk" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+
 ![Example of Workflowy Daily Page Extension](/cline_docs/images/example.png)
 
 ## Installation
@@ -66,3 +70,4 @@ If the right pane is not showing daily content:
 ## Contributing
 
 Feel free to submit issues and enhancement requests!
+
