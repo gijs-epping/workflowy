@@ -28,8 +28,47 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             this.retryAttempts = 0;
             this.maxRetries = 10;
             this.retryDelay = 1000;
+            this.parentNodeId = null;
 
             WorkflowyDailyPage.instance = this;
+
+            // Load parent node ID from storage
+            chrome.storage.sync.get(['parentNodeId'], (result) => {
+                if (result.parentNodeId) {
+                    this.parentNodeId = result.parentNodeId;
+                }
+            });
+        }
+
+        // Helper function to extract the last part of a node ID
+        extractLastPartOfId(fullId) {
+            // Match the last segment after the last hyphen
+            const match = fullId.match(/-([^-]+)$/);
+            return match ? match[1] : fullId;
+        }
+
+        // Helper function to check if a node is a descendant of the parent node
+        isDescendantOf(node, items) {
+            if (!node || !this.parentNodeId) return true; // If no parent ID is set, include all nodes
+            
+            let current = node;
+            while (current) {
+                // Extract the last part of the current node's ID
+                const currentLastPart = this.extractLastPartOfId(current.id);
+                
+                // Check if it matches the parent node ID
+                if (currentLastPart === this.parentNodeId) {
+                    return true;
+                }
+
+                // If we've reached the root, break
+                if (!current.prnt) break;
+
+                // Find the parent node
+                current = items.find(item => item.id === current.prnt);
+                if (!current) break;
+            }
+            return false;
         }
 
         async init() {
@@ -107,13 +146,13 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
 
             this.header.innerHTML = `
                 <div class="daily-calendar">
-                    <button class="daily-nav-arrow prev">
+                    <button class="daily-nav-arrow prevDaily">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
                     <div class="daily-date-grid"></div>
-                    <button class="daily-nav-arrow next">
+                    <button class="daily-nav-arrow nextDaily">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -121,9 +160,9 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                 </div>
             `;
 
-            // Add event listeners
-            this.header.querySelector('.daily-nav-arrow.prev').addEventListener('click', () => this.navigateWeek(-1));
-            this.header.querySelector('.daily-nav-arrow.next').addEventListener('click', () => this.navigateWeek(1));
+            // Update event listeners to use new class names
+            this.header.querySelector('.daily-nav-arrow.prevDaily').addEventListener('click', () => this.navigateWeek(-1));
+            this.header.querySelector('.daily-nav-arrow.nextDaily').addEventListener('click', () => this.navigateWeek(1));
             
             document.body.appendChild(this.header);
             this.updateDateGrid();
@@ -170,7 +209,7 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
         handleDateClick(date) {
             console.log('Date clicked:', date);
             this.currentDate = date;
-            this.updateDateGrid();
+
             this.handleDateChange(date);
         }
 
@@ -189,25 +228,37 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                 console.log('Handling date change:', { year, month, day });
 
                 // Refresh tree data
-                await this.sendMessage({ type: 'REFRESH_TREE_DATA' });
+                const treeResponse = await this.sendMessage({ type: 'REFRESH_TREE_DATA' });
+                if (!treeResponse.success) {
+                    throw new Error('Failed to refresh tree data');
+                }
 
-                // Find date node
-                const response = await this.sendMessage({
-                    type: 'FIND_DATE_NODE',
-                    year,
-                    month,
-                    day
+                // Find all matching date nodes
+                const dateNodes = treeResponse.data.items.filter(item => {
+                    const timeMatch = item.nm.match(/<time startYear="(\d+)" startMonth="(\d+)" startDay="(\d+)">/);
+                    if (timeMatch) {
+                        const [_, nodeYear, nodeMonth, nodeDay] = timeMatch;
+                        return parseInt(nodeYear) === year &&
+                               parseInt(nodeMonth) === month &&
+                               parseInt(nodeDay) === day;
+                    }
+                    return false;
                 });
 
-                if (response.success && response.node) {
-                    console.log('Found date node:', response.node);
-                    const nodeUrl = `https://workflowy.com/#/${response.node.id}`;
+                // Filter nodes based on parent node
+                const matchingNode = dateNodes.find(node => 
+                    this.isDescendantOf(node, treeResponse.data.items)
+                );
+
+                if (matchingNode) {
+                    console.log('Found matching date node:', matchingNode);
+                    const nodeUrl = `https://workflowy.com/#/${matchingNode.id}`;
                     console.log('Navigating to:', nodeUrl);
                     if (this.rightIframe) {
                         this.rightIframe.src = nodeUrl;
                     }
                 } else {
-                    console.log('No date node found for:', { year, month, day });
+                    console.log('No matching date node found for:', { year, month, day });
                 }
             } catch (error) {
                 console.error('Error in handleDateChange:', error);
@@ -218,4 +269,12 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
     // Initialize the extension
     const workflowyDaily = WorkflowyDailyPage.getInstance();
     workflowyDaily.init();
+
+    // Listen for messages from popup
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === 'SET_PARENT_NODE') {
+            workflowyDaily.parentNodeId = message.parentNodeId;
+            sendResponse({ success: true });
+        }
+    });
 }

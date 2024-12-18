@@ -67,3 +67,7 @@ Implemented new header design for the Workflowy Daily Page extension.
 - Document keyboard shortcuts
 - Add navigation instructions
 - Include settings documentation
+
+## Login Information
+- The extension relies on Workflowy's existing login mechanism. It does not implement its own login system.
+- The extension uses `fetch` to make authenticated requests to the Workflowy API, including cookies to maintain the user's logged-in session.

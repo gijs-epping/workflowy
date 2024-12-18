@@ -2,101 +2,95 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // Get UI elements
-    const toggleViewBtn = document.getElementById('toggleView');
-    const refreshViewBtn = document.getElementById('refreshView');
-    const autoExpandCheckbox = document.getElementById('autoExpand');
-    const defaultViewSelect = document.getElementById('defaultView');
-    const statusElement = document.getElementById('status');
+    const parentNodeInput = document.getElementById('parentNodeId');
+    const setParentNodeBtn = document.getElementById('setParentNode');
+    const statusElement = document.querySelector('.date-title'); // Using date-title for status
 
-    // Initialize status
-    updateStatus();
-
-    // Toggle daily view
-    toggleViewBtn.addEventListener('click', async () => {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
-        if (tab.url.includes('workflowy.com')) {
-            try {
-                await chrome.runtime.sendMessage({ type: 'TOGGLE_DAILY_VIEW' });
-                window.close();
-            } catch (error) {
-                console.warn('Error toggling view:', error);
-                updateStatus('Error: Could not toggle view');
-            }
-        } else {
-            updateStatus('Not a Workflowy page');
+    // Load saved parent node ID
+    chrome.storage.sync.get(['parentNodeId'], (result) => {
+        if (result.parentNodeId) {
+            parentNodeInput.value = result.parentNodeId;
+            updateStatus('Parent node set');
         }
     });
 
-    // Refresh view
-    refreshViewBtn.addEventListener('click', async () => {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // Handle setting parent node
+    setParentNodeBtn.addEventListener('click', async () => {
+        const parentNodeId = parentNodeInput.value.trim();
         
-        if (tab.url.includes('workflowy.com')) {
-            try {
-                chrome.tabs.reload(tab.id);
-                window.close();
-            } catch (error) {
-                console.warn('Error refreshing view:', error);
-                updateStatus('Error: Could not refresh view');
-            }
-        }
-    });
+        // Extract the node ID from the full URL if a URL was pasted
+        const idMatch = parentNodeId.match(/workflowy\.com\/#\/([^?]+)/);
+        const cleanNodeId = idMatch ? idMatch[1] : parentNodeId;
 
-    // Handle settings changes
-    autoExpandCheckbox.addEventListener('change', (e) => {
+        if (!cleanNodeId) {
+            updateStatus('Please enter a node ID');
+            return;
+        }
+
         try {
-            chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-                if (tab && tab.url.includes('workflowy.com')) {
-                    chrome.tabs.sendMessage(tab.id, {
-                        type: 'UPDATE_SETTINGS',
-                        settings: { autoExpand: e.target.checked }
-                    });
+            // Save the parent node ID
+            await chrome.storage.sync.set({ parentNodeId: cleanNodeId });
+            
+            // Notify the background script
+            chrome.runtime.sendMessage({ 
+                type: 'SET_PARENT_NODE', 
+                parentNodeId: cleanNodeId 
+            }, (response) => {
+                if (response && response.success) {
+                    updateStatus('Parent node set successfully');
+                } else {
+                    updateStatus('Error: Invalid node ID');
                 }
             });
         } catch (error) {
-            console.warn('Error updating auto-expand setting:', error);
+            console.error('Error setting parent node:', error);
+            updateStatus('Error setting parent node');
         }
     });
 
-    defaultViewSelect.addEventListener('change', (e) => {
-        try {
-            chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-                if (tab && tab.url.includes('workflowy.com')) {
-                    chrome.tabs.sendMessage(tab.id, {
-                        type: 'UPDATE_SETTINGS',
-                        settings: { defaultView: e.target.value }
-                    });
-                }
+    // Handle date cell clicks
+    document.querySelectorAll('.date-cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const day = cell.querySelector('.date').textContent;
+            const date = new Date();
+            date.setDate(parseInt(day));
+            
+            // Remove active class from all cells
+            document.querySelectorAll('.date-cell').forEach(c => c.classList.remove('active'));
+            // Add active class to clicked cell
+            cell.classList.add('active');
+
+            // Send message to find date node
+            chrome.runtime.sendMessage({
+                type: 'FIND_DATE_NODE',
+                year: date.getFullYear(),
+                month: date.getMonth() + 1,
+                day: parseInt(day)
             });
-        } catch (error) {
-            console.warn('Error updating default view setting:', error);
-        }
+        });
     });
 
-    function updateStatus(message = 'Active') {
-        try {
+    // Handle navigation arrows
+    document.querySelector('.nav-arrow.prev').addEventListener('click', () => {
+        // Previous week logic
+    });
+
+    document.querySelector('.nav-arrow.next').addEventListener('click', () => {
+        // Next week logic
+    });
+
+    function updateStatus(message) {
+        if (statusElement) {
             statusElement.textContent = message;
-            if (message === 'Active') {
-                statusElement.style.color = '#2c7be5';
-            } else if (message.startsWith('Error')) {
-                statusElement.style.color = '#dc3545';
-            } else {
-                statusElement.style.color = '#6c757d';
-            }
-        } catch (error) {
-            console.warn('Error updating status:', error);
         }
     }
 
     // Check if we're on a Workflowy page
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
         if (!tab.url.includes('workflowy.com')) {
-            updateStatus('Inactive');
-            toggleViewBtn.disabled = true;
-            refreshViewBtn.disabled = true;
-            autoExpandCheckbox.disabled = true;
-            defaultViewSelect.disabled = true;
+            updateStatus('Not a Workflowy page');
+            setParentNodeBtn.disabled = true;
+            parentNodeInput.disabled = true;
         }
     });
 });

@@ -60,24 +60,6 @@ async function initializeSession() {
     }
 }
 
-// Find a node by date
-function findDateNode(year, month, day) {
-    if (!sessionData.treeData || !sessionData.treeData.items) {
-        return null;
-    }
-
-    return sessionData.treeData.items.find(item => {
-        const timeMatch = item.nm.match(/<time startYear="(\d+)" startMonth="(\d+)" startDay="(\d+)">/);
-        if (timeMatch) {
-            const [_, nodeYear, nodeMonth, nodeDay] = timeMatch;
-            return parseInt(nodeYear) === year &&
-                   parseInt(nodeMonth) === month &&
-                   parseInt(nodeDay) === day;
-        }
-        return false;
-    });
-}
-
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.warn('Background received message:', message);
@@ -86,13 +68,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         initializeSession()
             .then(data => sendResponse({ success: true, data }))
             .catch(error => sendResponse({ success: false, error: error.message }));
-        return true;
-    }
-    
-    if (message.type === 'FIND_DATE_NODE') {
-        const { year, month, day } = message;
-        const node = findDateNode(year, month, day);
-        sendResponse({ success: true, node });
         return true;
     }
 

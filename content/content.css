@@ -6,7 +6,7 @@
     width: 100%;
     height: 100vh;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 70% 30%; /* Changed from 1fr 1fr to 70% 30% */
     gap: 1px;
     background-color: #e0e0e0;
     z-index: 1000;
@@ -31,7 +31,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    width: 50%;
+    width: 30%; /* Changed from 50% to match right pane width */
     background: white;
     padding: 8px;
     z-index: 1001;
@@ -44,15 +44,12 @@
 .daily-calendar {
     display: flex;
     align-items: center;
-    gap: 4px;
     height: 100%;
+    gap: 8px;
 }
 
 /* Navigation arrows */
 .daily-nav-arrow {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
     background: none;
     border: none;
     padding: 8px;
@@ -63,17 +60,15 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
-    z-index: 1002;
+    flex-shrink: 0;
 }
 
-.daily-nav-arrow.prev {
-    right: calc(50% + 8px);
-    transform: translateX(100%) translateY(-50%);
+.daily-nav-arrow.prevDaily {
+    order: -1;
 }
 
-.daily-nav-arrow.next {
-    right: 8px;
-    transform: translateY(-50%);
+.daily-nav-arrow.nextDaily {
+    order: 1;
 }
 
 .daily-nav-arrow:hover {
@@ -84,6 +79,7 @@
     display: flex;
     flex-grow: 1;
     gap: 4px;
+    order: 0;
 }
 
 .daily-date-cell {
