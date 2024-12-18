@@ -13,8 +13,7 @@ workflowy/
 │   ├── popup.html      # Extension popup interface
 │   ├── popup.css       # Popup styles
 │   └── popup.js        # Popup functionality and settings management
-└── icons/              # Extension icons (placeholder)
-    └── README.txt      # Icon placeholder note
+└── icons/              # Extension icons
 ```
 
 ## Key Components
@@ -24,6 +23,7 @@ workflowy/
 - Handles iframe embedding of Workflowy content
 - Manages date selection and navigation
 - Provides dynamic content loading
+- Implements mirror icon functionality for quick node mirroring
 
 ### Background Service Worker (background.js)
 - Manages extension lifecycle events
@@ -33,11 +33,21 @@ workflowy/
 
 ### Popup Interface
 - Settings management:
-  - Auto-expand daily nodes option
-  - Default view preference
+  - Parent node ID configuration
+  - Status display
 - View toggle functionality
-- Status display
 - Refresh capability
+
+## Setup Requirements
+1. Calendar Structure:
+   - Generated via workflowy-calendar-generator.com
+   - Must be properly formatted with time tags
+   - Organized under a parent node
+
+2. Parent Node Configuration:
+   - ID extracted from Workflowy URL
+   - Stored in extension settings
+   - Used to filter and locate daily nodes
 
 ## Data Flow
 1. Extension activates on Workflowy domain
@@ -54,18 +64,23 @@ workflowy/
 - Manages cross-origin communication
 - Provides user settings persistence
 - Handles dynamic content updates
+- Mirror icon functionality for quick node copying
 
 ## External Dependencies
 - Workflowy web interface
 - Chrome Extensions API
 - Web APIs (DOM, iframe, Storage)
+- Workflowy Calendar Generator (for setup)
 
 ## Recent Significant Changes
-- Initial implementation complete:
-  - Two-pane layout system
-  - Date selection functionality
-  - Settings management
-  - Extension popup interface
+- Added mirror icon functionality:
+  - Left-aligned icon placement
+  - Hover-based visibility
+  - Click-to-mirror functionality
+  - Keyboard event simulation
+- Improved iframe handling
+- Enhanced style injection
+- Updated documentation
 
 ## Development Guidelines
 - Follow Chrome Extensions best practices
@@ -78,11 +93,11 @@ workflowy/
 - Requires Workflowy to be loaded
 - May need adjustments for Workflowy updates
 - Cross-origin restrictions may apply
-- Placeholder icons need replacement
+- Requires proper calendar structure setup
 
 ## Next Steps
-1. Replace placeholder icons with proper extension icons
-2. Implement comprehensive error handling
-3. Add loading indicators
-4. Enhance date navigation
-5. Add keyboard shortcuts
+1. Enhance error handling for setup process
+2. Add visual feedback for mirror action
+3. Improve calendar navigation UX
+4. Add setup wizard functionality
+5. Implement automatic calendar structure verification
