@@ -4,6 +4,14 @@ A Chrome extension that enhances Workflowy with a two-pane layout for efficient 
 
 ![Example of Workflowy Daily Page Extension](/cline_docs/images/example.png)
 
+## Installation
+
+1. [Download all files from this repository](https://github.com/gijs-epping/workflowy/archive/refs/heads/main.zip)
+2. Visit `chrome://extensions` in your Chrome browser (via omnibox or menu -> Tools -> Extensions)
+3. Enable Developer mode by ticking the checkbox in the upper-right corner
+4. Click on the "Load unpacked extension..." button
+5. Select the directory containing the downloaded extension files
+
 ## Features
 
 - Two-pane layout
