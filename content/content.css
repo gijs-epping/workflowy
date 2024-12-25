@@ -1,121 +1,217 @@
-/* Two-pane layout styles */
-.workflowy-daily-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: 70% 30%; /* Changed from 1fr 1fr to 70% 30% */
-    gap: 1px;
-    background-color: #e0e0e0;
-    z-index: 1000;
+/* Workflowy Daily styles */
+.workflowy-daily-active {
+    --wf-hover-bg: rgba(0, 0, 0, 0.05);
+    --wf-active-bg: rgba(0, 0, 0, 0.1);
+    --wf-text: #333;
+    --wf-icon: #666;
 }
 
-.workflowy-daily-pane {
-    background: white;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
+/* Layout styles */
+body.workflowy-daily-active {
+    overflow: hidden !important;
 }
 
-.workflowy-daily-pane iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: white;
+body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-daily-header) {
+    display: none !important;
 }
 
 /* Header styles */
 .workflowy-daily-header {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 30%; /* Changed from 50% to match right pane width */
-    background: white;
-    padding: 8px;
-    z-index: 1001;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    border-bottom: 1px solid #e0e0e0;
-    height: 54px;
-    box-sizing: border-box;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 48px !important;
+    background: var(--wf-background) !important;
+    border-bottom: 1px solid var(--wf-border) !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 16px !important;
 }
 
+/* Container and pane styles */
+.workflowy-daily-container {
+    display: flex !important;
+    position: fixed !important;
+    top: 48px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: var(--wf-background) !important;
+    z-index: 2147483646 !important;
+}
+
+.workflowy-daily-pane {
+    flex: 1 !important;
+    position: relative !important;
+    border-right: 1px solid var(--wf-border) !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+.workflowy-daily-pane:last-child {
+    border-right: none !important;
+}
+
+.workflowy-daily-pane iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    background: var(--wf-background) !important;
+    display: block !important;
+}
+
+/* Calendar styles */
 .daily-calendar {
     display: flex;
     align-items: center;
-    height: 100%;
-    gap: 8px;
+    gap: 16px;
 }
 
-/* Navigation arrows */
 .daily-nav-arrow {
     background: none;
     border: none;
-    padding: 8px;
+    padding: 4px;
     cursor: pointer;
-    color: #6c757d;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-    flex-shrink: 0;
-}
-
-.daily-nav-arrow.prevDaily {
-    order: -1;
-}
-
-.daily-nav-arrow.nextDaily {
-    order: 1;
+    color: var(--wf-text);
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
 }
 
 .daily-nav-arrow:hover {
-    background-color: #f5f5f5;
+    opacity: 1;
 }
 
 .daily-date-grid {
     display: flex;
-    flex-grow: 1;
-    gap: 4px;
-    order: 0;
+    gap: 8px;
 }
 
 .daily-date-cell {
-    flex: 1;
+    padding: 4px 8px;
     text-align: center;
-    padding: 4px;
-    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
 }
 
 .daily-date-cell:hover {
-    background-color: #f5f5f5;
+    background-color: var(--wf-hover-bg);
 }
 
 .daily-date-cell.active {
-    background-color: #e0e0e0;
+    background-color: var(--wf-active-bg);
 }
 
 .daily-date-cell .day {
     font-size: 12px;
-    color: #6c757d;
-    margin-bottom: 2px;
+    opacity: 0.7;
 }
 
 .daily-date-cell .date {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
+    font-size: 14px;
+    font-weight: 500;
 }
 
-/* Ensure proper stacking context */
-body {
-    margin: 0;
-    padding: 0;
+/* Button group styles */
+.hover-btn-group {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    margin-left: 4px;
+}
+
+/* Mirror button styles */
+.send-btn.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--wf-icon);
+    transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    outline: none;
+    position: relative;
+}
+
+.send-btn.iconButton:hover {
+    background-color: var(--wf-hover-bg);
+    color: var(--wf-text);
+}
+
+.send-btn.iconButton:active {
+    background-color: var(--wf-active-bg);
+}
+
+/* SVG icon styles */
+.send-btn.iconButton svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+}
+
+/* Tooltip styles */
+.send-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    margin-bottom: 4px;
+    z-index: 1000;
+}
+
+.send-btn:hover[data-tooltip]::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Sent feedback animation */
+.send-btn.sent {
+    animation: sendPulse 0.3s ease;
+}
+
+@keyframes sendPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Ensure buttons are visible in both light and dark themes */
+@media (prefers-color-scheme: dark) {
+    .workflowy-daily-active {
+        --wf-hover-bg: rgba(255, 255, 255, 0.1);
+        --wf-active-bg: rgba(255, 255, 255, 0.15);
+        --wf-text: #fff;
+        --wf-icon: #aaa;
+    }
+}
+
+/* Workflowy specific overrides */
+.nameButtons {
+    display: flex;
+    align-items: center;
+}
+
+.comment-hover-btn-group {
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
 }

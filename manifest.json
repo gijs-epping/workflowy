@@ -11,16 +11,31 @@
   },
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "cookies"
   ],
   "host_permissions": [
-    "https://workflowy.com/*"
+    "https://workflowy.com/*",
+    "https://*.workflowy.com/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://workflowy.com/*"],
+      "matches": [
+        "https://workflowy.com/*",
+        "http://workflowy.com/*"
+      ],
       "css": ["content/content.css"],
-      "js": ["content/content.js"]
+      "js": ["content/content.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://workflowy.com/*",
+        "http://workflowy.com/*"
+      ],
+      "js": ["content/paste-handler.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
     }
   ],
   "background": {
