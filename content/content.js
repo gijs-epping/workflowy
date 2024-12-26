@@ -386,75 +386,96 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
         }
 
         async createHeader() {
-            // Load Nord Design System resources
-            await Promise.all([
-                this.loadStylesheet('https://nordcdn.net/ds/fonts/3.0.0/fonts.css'),
-                this.loadStylesheet('https://nordcdn.net/ds/css/3.2.0/nord.min.css'),
-                this.loadScript('https://nordcdn.net/ds/components/3.12.0/index.js')
-            ]);
+            try {
+                this.header = document.createElement('div');
+                this.header.className = 'workflowy-daily-header';
+                this.header.setAttribute('data-instance-id', this.instanceId);
 
-            this.header = document.createElement('div');
-            this.header.className = 'workflowy-daily-header';
-            this.header.setAttribute('data-instance-id', this.instanceId);
-
-            this.header.innerHTML = `
-                <div class="daily-calendar">
-                    <button class="daily-nav-arrow prevDaily">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <button class="calendar-button" aria-label="Open Calendar">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M16 2V6M8 2V6M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <div class="daily-date-grid"></div>
-                    <button class="daily-nav-arrow nextDaily">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <div class="calendar-popup" style="display: none;">
-                        <nord-stack>
-                            <nord-calendar></nord-calendar>
-                        </nord-stack>
+                this.header.innerHTML = `
+                    <div class="daily-calendar">
+                        <button class="daily-nav-arrow prevDaily">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="calendar-button" aria-label="Open Calendar">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 2V6M8 2V6M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <div class="daily-date-grid"></div>
+                        <button class="daily-nav-arrow nextDaily">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <div class="calendar-popup" style="display: none;">
+                            <div class="calendar-header">
+                                <button class="prev-month">&lt;</button>
+                                <span class="current-month-year"></span>
+                                <button class="next-month">&gt;</button>
+                            </div>
+                            <div class="calendar-grid">
+                                <div class="weekday">Sun</div>
+                                <div class="weekday">Mon</div>
+                                <div class="weekday">Tue</div>
+                                <div class="weekday">Wed</div>
+                                <div class="weekday">Thu</div>
+                                <div class="weekday">Fri</div>
+                                <div class="weekday">Sat</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            // Add event listeners
-            this.header.querySelector('.daily-nav-arrow.prevDaily').addEventListener('click', () => this.navigateWeek(-1));
-            this.header.querySelector('.daily-nav-arrow.nextDaily').addEventListener('click', () => this.navigateWeek(1));
-            
-            const calendarButton = this.header.querySelector('.calendar-button');
-            const calendarPopup = this.header.querySelector('.calendar-popup');
-            const nordCalendar = calendarPopup.querySelector('nord-calendar');
+                // Add event listeners to navigation buttons
+                this.header.querySelector('.daily-nav-arrow.prevDaily').addEventListener('click', () => this.navigateWeek(-1));
+                this.header.querySelector('.daily-nav-arrow.nextDaily').addEventListener('click', () => this.navigateWeek(1));
 
-            calendarButton.addEventListener('click', () => {
-                calendarPopup.style.display = calendarPopup.style.display === 'none' ? 'block' : 'none';
-            });
+                // Setup calendar button and popup
+                const calendarButton = this.header.querySelector('.calendar-button');
+                const calendarPopup = this.header.querySelector('.calendar-popup');
+                const prevMonthBtn = calendarPopup.querySelector('.prev-month');
+                const nextMonthBtn = calendarPopup.querySelector('.next-month');
 
-            // Close calendar when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!calendarPopup.contains(e.target) && !calendarButton.contains(e.target)) {
-                    calendarPopup.style.display = 'none';
-                }
-            });
+                calendarButton.addEventListener('click', () => {
+                    if (calendarPopup.style.display === 'none') {
+                        calendarPopup.style.display = 'block';
+                        this.updateCalendarPopup();
+                    } else {
+                        calendarPopup.style.display = 'none';
+                    }
+                });
 
-            // Handle calendar date selection
-            nordCalendar.addEventListener('dateChange', (e) => {
-                const selectedDate = new Date(e.detail.value);
-                this.currentDate = selectedDate;
-                this.handleDateChange(selectedDate);
-                calendarPopup.style.display = 'none';
+                // Close calendar when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!calendarPopup.contains(e.target) && !calendarButton.contains(e.target)) {
+                        calendarPopup.style.display = 'none';
+                    }
+                });
+
+                // Month navigation
+                prevMonthBtn.addEventListener('click', () => {
+                    const date = new Date(this.currentDate);
+                    date.setMonth(date.getMonth() - 1);
+                    this.updateCalendarPopup(date);
+                });
+
+                nextMonthBtn.addEventListener('click', () => {
+                    const date = new Date(this.currentDate);
+                    date.setMonth(date.getMonth() + 1);
+                    this.updateCalendarPopup(date);
+                });
+
+                document.body.appendChild(this.header);
                 this.updateDateGrid();
-            });
-
-            document.body.appendChild(this.header);
-            this.updateDateGrid();
+            } catch (error) {
+                console.error('Error initializing calendar:', error);
+            }
         }
+        
+        
 
         // Helper method to load stylesheets
         loadStylesheet(url) {
@@ -478,6 +499,133 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                 script.onerror = reject;
                 document.head.appendChild(script);
             });
+        }
+
+        updateCalendarPopup(date = this.currentDate) {
+            const popup = this.header.querySelector('.calendar-popup');
+            const monthYearSpan = popup.querySelector('.current-month-year');
+            const calendarGrid = popup.querySelector('.calendar-grid');
+            const today = new Date();
+
+            // Update month and year display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            monthYearSpan.textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+
+            // Clear existing calendar days
+            const existingDays = calendarGrid.querySelectorAll('.calendar-day');
+            existingDays.forEach(day => day.remove());
+
+            // Get first day of month and total days
+            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+            const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            const totalDays = lastDay.getDate();
+            const firstDayIndex = firstDay.getDay();
+
+            // Add empty cells for days before first of month
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Add days of month
+            for (let day = 1; day <= totalDays; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+
+                // Add classes for current day and selected day
+                const currentDate = new Date(date.getFullYear(), date.getMonth(), day);
+                
+                if (this.isSameDay(currentDate, today)) {
+                    dayElement.classList.add('current-day');
+                }
+                
+                if (this.isSameDay(currentDate, this.currentDate)) {
+                    dayElement.classList.add('selected-day');
+                }
+
+                dayElement.addEventListener('click', () => {
+                    this.currentDate = currentDate;
+                    this.handleDateChange(currentDate);
+                    popup.style.display = 'none';
+                    this.updateDateGrid();
+                });
+
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Add styles for calendar
+            const style = document.createElement('style');
+            style.textContent = `
+                .calendar-popup {
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: white;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    padding: 10px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    z-index: 1000;
+                }
+
+                .calendar-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+
+                .calendar-header button {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 5px 10px;
+                }
+
+                .calendar-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 2px;
+                }
+
+                .weekday {
+                    text-align: center;
+                    font-weight: bold;
+                    padding: 5px;
+                }
+
+                .calendar-day {
+                    text-align: center;
+                    padding: 8px;
+                    cursor: pointer;
+                    border-radius: 4px;
+                }
+
+                .calendar-day:hover {
+                    background-color: #f0f0f0;
+                }
+
+                .calendar-day.empty {
+                    cursor: default;
+                }
+
+                .calendar-day.current-day {
+                    background-color: #e0e0e0;
+                }
+
+                .calendar-day.selected-day {
+                    background-color: #90EE90;
+                }
+            `;
+            
+            if (!document.querySelector('#calendar-styles')) {
+                style.id = 'calendar-styles';
+                document.head.appendChild(style);
+            }
         }
 
         updateDateGrid() {
