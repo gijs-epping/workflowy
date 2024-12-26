@@ -19,7 +19,7 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 .workflowy-daily-header {
     position: fixed !important;
     top: 0 !important;
-    left: 0 !important;
+    left: 50% !important;
     right: 0 !important;
     height: 48px !important;
     background: var(--wf-background) !important;
@@ -35,7 +35,7 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 .workflowy-daily-container {
     display: flex !important;
     position: fixed !important;
-    top: 48px !important;
+    top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
@@ -53,6 +53,7 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 
 .workflowy-daily-pane:last-child {
     border-right: none !important;
+    padding-top: 48px !important;
 }
 
 .workflowy-daily-pane iframe {
