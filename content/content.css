@@ -152,21 +152,27 @@ nord-calendar {
     font-weight: 500;
 }
 
-/* Button group styles */
-.hover-btn-group {
-    display: none;
-    align-items: center;
-    gap: 4px;
-    margin-left: 4px;
+/* Mirror button styles */
+.name {
+    left: calc(var(--name-left-overhang) - 50px);
+    position: absolute;
+    display: flex !important;
+    align-items: center !important;
 }
 
-/* Mirror button styles */
+.send-btn {
+    left: calc(var(--name-left-overhang) - 50px) !important;
+    position: absolute!important;
+}
+
 .send-btn.iconButton {
-    display: flex;
+    left: calc(var(--name-left-overhang) - 50px) !important;
+    position: absolute!important;
+    display: none;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 9px;
+    height: 9px;
     padding: 3px;
     border-radius: 50%;
     cursor: pointer;
@@ -175,40 +181,47 @@ nord-calendar {
     background: transparent;
     border: none;
     outline: none;
-    position: relative;
+    position: absolute;
+    top: 6px;
+    left: calc(var(--name-left-overhang) - 50px);
 }
 
 .send-btn.iconButton:hover {
+    left: calc(var(--name-left-overhang) - 50px) !important;
+    position: absolute!important;
     background-color: var(--wf-hover-bg);
     color: var(--wf-text);
 }
 
 .send-btn.iconButton:active {
+    left: calc(var(--name-left-overhang) - 50px) !important;
+    position: absolute!important;
     background-color: var(--wf-active-bg);
 }
 
 /* SVG icon styles */
 .send-btn.iconButton svg {
-    width: 16px;
-    height: 16px;
+    width: 9px;
+    height: 9px;
     transition: transform 0.2s ease;
 }
 
 /* Tooltip styles */
 .send-btn[data-tooltip]::after {
+    left: calc(var(--name-left-overhang) - 50px) !important;
+    position: absolute!important;
     content: attr(data-tooltip);
     position: absolute;
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    padding: 4px 8px;
+    padding: 2px 4px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    font-size: 12px;
-    border-radius: 4px;
+    font-size: 10px;
+    border-radius: 3px;
     white-space: nowrap;
     opacity: 0;
-    visibility: hidden;
     transition: all 0.2s ease;
     pointer-events: none;
     margin-bottom: 4px;
@@ -216,6 +229,8 @@ nord-calendar {
 }
 
 .send-btn:hover[data-tooltip]::after {
+    left: calc(var(--name-left-overhang) - 50px) !important;
+    position: absolute!important;
     opacity: 1;
     visibility: visible;
 }

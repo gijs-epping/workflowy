@@ -271,20 +271,22 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
         setupLeftPane(iframe) {
             const doc = iframe.contentDocument;
             
-            // Function to create button group with mirror button
-            const createButtonGroup = (projectNode) => {
-                const btnGroup = document.createElement('div');
-                btnGroup.className = 'hover-btn-group comment-hover-btn-group';
+            // Function to add buttons to node
+            const addButtonsToNode = (project) => {
+                // Get the bullet element
+                const bullet = project.querySelector('.expand');
+                if (!bullet || project.querySelector('.send-btn')) return;
 
                 // Create mirror button
                 const mirrorBtn = document.createElement('a');
                 mirrorBtn.className = 'send-btn iconButton lg shape-circle';
                 mirrorBtn.setAttribute('data-tooltip', 'Mirror Node');
+                mirrorBtn.setAttribute('style', 'display: flex; width: 20px; height: 20px;left: calc(var(--name-left-overhang) - 75px) !important; position: absolute!important;');
                 
                 const mirrorSvg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                mirrorSvg.setAttribute('width', '18');
-                mirrorSvg.setAttribute('height', '18');
-                mirrorSvg.setAttribute('viewBox', '0 0 18 18');
+                mirrorSvg.setAttribute('width', '10');
+                mirrorSvg.setAttribute('height', '10');
+                mirrorSvg.setAttribute('viewBox', '0 0 10 10');
                 mirrorSvg.classList.add('svg-inline--fa', 'fa-arrow-right-arrow-left', 'fa-1x');
                 
                 const mirrorPath = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -297,17 +299,16 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                 
                 mirrorSvg.appendChild(mirrorPath);
                 mirrorBtn.appendChild(mirrorSvg);
-                btnGroup.appendChild(mirrorBtn);
 
                 // Add click handler for mirror button
                 mirrorBtn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     
-                    const nodeId = projectNode.getAttribute('projectid');
+                    const nodeId = project.getAttribute('projectid');
                     if (!nodeId) return;
 
-                    const nameElement = projectNode.querySelector('.name');
+                    const nameElement = project.querySelector('.name');
                     if (!nameElement) return;
 
                     // Get node text
@@ -328,25 +329,17 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                     }, 500);
                 });
 
-                return btnGroup;
-            };
+                // Insert mirror button before bullet
+                bullet.parentNode.insertBefore(mirrorBtn, bullet);
 
-            // Function to add buttons to node
-            const addButtonsToNode = (project) => {
-                const nameButtons = project.querySelector('.nameButtons');
-                if (!nameButtons || nameButtons.querySelector('.send-btn')) return;
-
-                const btnGroup = createButtonGroup(project);
-                nameButtons.insertBefore(btnGroup, nameButtons.firstChild);
-
-                // Show buttons on hover
+                // Show button on hover
                 const name = project.querySelector('.name');
                 if (name) {
                     name.addEventListener('mouseenter', () => {
-                        btnGroup.style.display = 'flex';
+                        mirrorBtn.style.display = 'flex';
                     });
                     name.addEventListener('mouseleave', () => {
-                        btnGroup.style.display = 'none';
+                        mirrorBtn.style.display = 'none';
                     });
                 }
             };
