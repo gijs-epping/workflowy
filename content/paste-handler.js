@@ -1,7 +1,7 @@
 // Listen for messages from parent window
 window.addEventListener('message', async (event) => {
     if (event.data.type === 'CREATE_MIRROR') {
-        try {
+       
             // Find the current node
             let currentNode = document.querySelector('.project.selected');
             if (!currentNode) {
@@ -22,29 +22,7 @@ window.addEventListener('message', async (event) => {
                 throw new Error('Add child button not found');
             }
 
-            // Find the newly created node's content
-            const newNode = currentNode.querySelector('.children .project:last-child .content');
-            if (!newNode) {
-                throw new Error('Could not find new node');
-            }
 
-            // 2. Click on node to focus it
-            const focusEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            });
-            newNode.dispatchEvent(focusEvent);
-            await new Promise(resolve => setTimeout(resolve, 50));
-
-            // 3. Go to end of line
-            const endEvent = new KeyboardEvent('keydown', {
-                key: 'End',
-                code: 'End',
-                bubbles: true
-            });
-            document.dispatchEvent(endEvent);
-            await new Promise(resolve => setTimeout(resolve, 50));
 
             // 4. Type opening parentheses
             document.execCommand('insertText', false, '((');
@@ -67,8 +45,6 @@ window.addEventListener('message', async (event) => {
             });
             document.dispatchEvent(enterEvent);
 
-        } catch (error) {
-            console.error('Failed to create mirror:', error);
-        }
+
     }
 });
