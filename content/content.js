@@ -385,7 +385,14 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             setTimeout(() => clearInterval(waitForWorkflowy), 10000);
         }
 
-        createHeader() {
+        async createHeader() {
+            // Load Nord Design System resources
+            await Promise.all([
+                this.loadStylesheet('https://nordcdn.net/ds/fonts/3.0.0/fonts.css'),
+                this.loadStylesheet('https://nordcdn.net/ds/css/3.2.0/nord.min.css'),
+                this.loadScript('https://nordcdn.net/ds/components/3.12.0/index.js')
+            ]);
+
             this.header = document.createElement('div');
             this.header.className = 'workflowy-daily-header';
             this.header.setAttribute('data-instance-id', this.instanceId);
@@ -397,21 +404,80 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
+                    <button class="calendar-button" aria-label="Open Calendar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 2V6M8 2V6M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                     <div class="daily-date-grid"></div>
                     <button class="daily-nav-arrow nextDaily">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
+                    <div class="calendar-popup" style="display: none;">
+                        <nord-stack>
+                            <nord-calendar></nord-calendar>
+                        </nord-stack>
+                    </div>
                 </div>
             `;
 
-            // Update event listeners to use new class names
+            // Add event listeners
             this.header.querySelector('.daily-nav-arrow.prevDaily').addEventListener('click', () => this.navigateWeek(-1));
             this.header.querySelector('.daily-nav-arrow.nextDaily').addEventListener('click', () => this.navigateWeek(1));
             
+            const calendarButton = this.header.querySelector('.calendar-button');
+            const calendarPopup = this.header.querySelector('.calendar-popup');
+            const nordCalendar = calendarPopup.querySelector('nord-calendar');
+
+            calendarButton.addEventListener('click', () => {
+                calendarPopup.style.display = calendarPopup.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close calendar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!calendarPopup.contains(e.target) && !calendarButton.contains(e.target)) {
+                    calendarPopup.style.display = 'none';
+                }
+            });
+
+            // Handle calendar date selection
+            nordCalendar.addEventListener('dateChange', (e) => {
+                const selectedDate = new Date(e.detail.value);
+                this.currentDate = selectedDate;
+                this.handleDateChange(selectedDate);
+                calendarPopup.style.display = 'none';
+                this.updateDateGrid();
+            });
+
             document.body.appendChild(this.header);
             this.updateDateGrid();
+        }
+
+        // Helper method to load stylesheets
+        loadStylesheet(url) {
+            return new Promise((resolve, reject) => {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = url;
+                link.onload = resolve;
+                link.onerror = reject;
+                document.head.appendChild(link);
+            });
+        }
+
+        // Helper method to load scripts
+        loadScript(url) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = url;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
         }
 
         updateDateGrid() {

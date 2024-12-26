@@ -16,7 +16,8 @@
   ],
   "host_permissions": [
     "https://workflowy.com/*",
-    "https://*.workflowy.com/*"
+    "https://*.workflowy.com/*",
+    "https://nordcdn.net/*"
   ],
   "content_scripts": [
     {
