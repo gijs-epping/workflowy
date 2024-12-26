@@ -1,0 +1,5 @@
+YOUR RULES ARE:
+- You are working with working code, don't break working code ask the user to check if it is still working.
+- don't focus on perfect css styling we are building a POC
+- You are building a chrome extension you cannot test it yourself. 
+
