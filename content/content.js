@@ -203,17 +203,24 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
 
                 // Create left pane
                 this.leftPane = document.createElement('div');
-                this.leftPane.className = 'workflowy-daily-pane';
+                this.leftPane.className = 'workflowy-daily-pane left-pane';
                 this.leftIframe = document.createElement('iframe');
                 this.leftPane.appendChild(this.leftIframe);
 
+                // Create divider
+                this.divider = document.createElement('div');
+                this.divider.className = 'workflowy-daily-divider';
+                this.divider.innerHTML = ''; // Ensure element is not self-closing
+                this.setupDragHandling();
+
                 // Create right pane
                 this.rightPane = document.createElement('div');
-                this.rightPane.className = 'workflowy-daily-pane';
+                this.rightPane.className = 'workflowy-daily-pane right-pane';
                 this.rightIframe = document.createElement('iframe');
                 this.rightPane.appendChild(this.rightIframe);
 
                 this.container.appendChild(this.leftPane);
+                this.container.appendChild(this.divider);
                 this.container.appendChild(this.rightPane);
                 document.body.appendChild(this.container);
 
@@ -267,81 +274,91 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             }
         }
 
+        setupDragHandling() {
+            let isDragging = false;
+            let startX;
+            let startLeftWidth;
+
+            const onMouseDown = (e) => {
+                e.preventDefault();
+                isDragging = true;
+                this.divider.classList.add('dragging');
+                startX = e.clientX;
+                startLeftWidth = this.leftPane.getBoundingClientRect().width;
+                
+                // Prevent text selection while dragging
+                document.body.style.userSelect = 'none';
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            };
+
+            const onMouseMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                const delta = e.clientX - startX;
+                const containerWidth = this.container.getBoundingClientRect().width;
+                const newLeftWidth = ((startLeftWidth + delta) / containerWidth) * 100;
+
+                // Limit the resize between 30% and 70%
+                if (newLeftWidth >= 30 && newLeftWidth <= 70) {
+                    requestAnimationFrame(() => {
+                        this.leftPane.style.setProperty('flex', `0 0 ${newLeftWidth}%`, 'important');
+                        this.rightPane.style.setProperty('flex', `0 0 ${100 - newLeftWidth}%`, 'important');
+                    });
+                }
+            };
+
+            const onMouseUp = (e) => {
+                e.preventDefault();
+                isDragging = false;
+                this.divider.classList.remove('dragging');
+                document.body.style.userSelect = '';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            this.divider.addEventListener('mousedown', onMouseDown);
+            this.divider.addEventListener('dragstart', (e) => e.preventDefault());
+        }
+
         // Setup left pane functionality
         setupLeftPane(iframe) {
             const doc = iframe.contentDocument;
             
-            // Function to add buttons to node
-            const addButtonsToNode = (project) => {
-                // Get the bullet element
-                const bullet = project.querySelector('.expand');
-                if (!bullet || project.querySelector('.send-btn')) return;
+            // Function to add CTRL+click handler to node
+            const addCtrlClickHandler = (project) => {
+                // Add CTRL+click handler
+                project.addEventListener('click', async (e) => {
+                    if (e.ctrlKey) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        
+                        const nodeId = project.getAttribute('projectid');
+                        if (!nodeId) return;
 
-                // Create mirror button
-                const mirrorBtn = document.createElement('a');
-                mirrorBtn.className = 'send-btn iconButton lg shape-circle';
-                mirrorBtn.setAttribute('data-tooltip', 'Mirror Node');
-                mirrorBtn.setAttribute('style', 'display: flex; width: 20px; height: 20px;left: calc(var(--name-left-overhang) - 75px) !important; position: absolute!important;');
-                
-                const mirrorSvg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                mirrorSvg.setAttribute('width', '10');
-                mirrorSvg.setAttribute('height', '10');
-                mirrorSvg.setAttribute('viewBox', '0 0 10 10');
-                mirrorSvg.classList.add('svg-inline--fa', 'fa-arrow-right-arrow-left', 'fa-1x');
-                
-                const mirrorPath = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
-                mirrorPath.setAttribute('d', 'M7.5 3.5L4 7l3.5 3.5M4 7h10m-3.5 4.5L14 15l3.5-3.5M14 15H4');
-                mirrorPath.setAttribute('stroke', 'currentColor');
-                mirrorPath.setAttribute('stroke-width', '1.5');
-                mirrorPath.setAttribute('fill', 'none');
-                mirrorPath.setAttribute('stroke-linecap', 'round');
-                mirrorPath.setAttribute('stroke-linejoin', 'round');
-                
-                mirrorSvg.appendChild(mirrorPath);
-                mirrorBtn.appendChild(mirrorSvg);
+                        const nameElement = project.querySelector('.name');
+                        if (!nameElement) return;
 
-                // Add click handler for mirror button
-                mirrorBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    
-                    const nodeId = project.getAttribute('projectid');
-                    if (!nodeId) return;
+                        // Get node text
+                        const nodeText = nameElement.textContent.trim();
+                        
+                        // Send message to right pane to create mirror
+                        if (this.rightIframe) {
+                            this.rightIframe.contentWindow.postMessage({
+                                type: 'CREATE_MIRROR',
+                                content: nodeText
+                            }, '*');
+                        }
 
-                    const nameElement = project.querySelector('.name');
-                    if (!nameElement) return;
-
-                    // Get node text
-                    const nodeText = nameElement.textContent.trim();
-                    
-                    // Send message to right pane to create mirror
-                    if (this.rightIframe) {
-                        this.rightIframe.contentWindow.postMessage({
-                            type: 'CREATE_MIRROR',
-                            content: nodeText
-                        }, '*');
+                        // Provide visual feedback
+                        project.classList.add('sent');
+                        setTimeout(() => {
+                            project.classList.remove('sent');
+                        }, 500);
                     }
-
-                    // Provide visual feedback
-                    mirrorBtn.classList.add('sent');
-                    setTimeout(() => {
-                        mirrorBtn.classList.remove('sent');
-                    }, 500);
                 });
-
-                // Insert mirror button before bullet
-                bullet.parentNode.insertBefore(mirrorBtn, bullet);
-
-                // Show button on hover
-                const name = project.querySelector('.name');
-                if (name) {
-                    name.addEventListener('mouseenter', () => {
-                        mirrorBtn.style.display = 'flex';
-                    });
-                    name.addEventListener('mouseleave', () => {
-                        mirrorBtn.style.display = 'none';
-                    });
-                }
             };
 
             // Watch for project nodes being added
@@ -350,9 +367,9 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType === 1) {
                             if (node.matches('.project')) {
-                                addButtonsToNode(node);
+                                addCtrlClickHandler(node);
                             }
-                            node.querySelectorAll('.project').forEach(addButtonsToNode);
+                            node.querySelectorAll('.project').forEach(addCtrlClickHandler);
                         }
                     });
                 });
@@ -364,7 +381,7 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                     clearInterval(waitForWorkflowy);
                     
                     // Add buttons to existing nodes
-                    doc.querySelectorAll('.project').forEach(addButtonsToNode);
+                    doc.querySelectorAll('.project').forEach(addCtrlClickHandler);
                     
                     // Watch for new nodes
                     observer.observe(doc.body, {

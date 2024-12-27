@@ -19,7 +19,7 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 .workflowy-daily-header {
     position: fixed !important;
     top: 0 !important;
-    left: 50% !important;
+    left: 60% !important;
     right: 0 !important;
     height: 48px !important;
     background: var(--wf-background) !important;
@@ -44,15 +44,46 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 }
 
 .workflowy-daily-pane {
-    flex: 1 !important;
     position: relative !important;
-    border-right: 1px solid var(--wf-border) !important;
     height: 100% !important;
     overflow: hidden !important;
+    border: none !important;
+    min-width: 0 !important; /* Prevent flex items from overflowing */
 }
 
-.workflowy-daily-pane:last-child {
-    border-right: none !important;
+.workflowy-daily-pane.left-pane {
+    flex: 0 0 60% !important;
+}
+
+.workflowy-daily-pane.right-pane {
+    flex: 0 0 40% !important;
+}
+
+.workflowy-daily-divider {
+    width: 8px !important;
+    background: #e0e0e0 !important;
+    cursor: col-resize !important;
+    position: relative !important;
+    z-index: 2147483646 !important;
+    transition: background-color 0.2s ease !important;
+    border-left: 1px solid #ccc !important;
+    border-right: 1px solid #ccc !important;
+    margin: 0 -1px !important;
+    flex-shrink: 0 !important;
+    height: 100% !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
+
+.workflowy-daily-divider:hover {
+    background: #d0d0d0 !important;
+}
+
+.workflowy-daily-divider.dragging {
+    background: #c0c0c0 !important;
+}
+
+.workflowy-daily-pane.right-pane {
     padding-top: 48px !important;
 }
 
