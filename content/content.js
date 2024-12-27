@@ -103,6 +103,9 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
             // Add active class and setup
             document.body.classList.add('workflowy-daily-active');
             await this.setup();
+            
+            // Navigate to current day on initial load
+            await this.handleDateChange(new Date());
         }
 
         cleanup() {
@@ -478,7 +481,7 @@ if (!window.WORKFLOWY_DAILY_INITIALIZED) {
                     this.updateCalendarPopup(date);
                 });
 
-                document.body.appendChild(this.header);
+                this.rightPane.insertBefore(this.header, this.rightIframe);
                 this.updateDateGrid();
             } catch (error) {
                 console.error('Error initializing calendar:', error);

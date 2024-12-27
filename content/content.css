@@ -17,14 +17,10 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 
 /* Header styles */
 .workflowy-daily-header {
-    position: fixed !important;
-    top: 0 !important;
-    left: 60% !important;
-    right: 0 !important;
+    position: absolute !important;
     height: 48px !important;
     background: var(--wf-background) !important;
     border-bottom: 1px solid var(--wf-border) !important;
-    z-index: 2147483647 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -57,6 +53,7 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 
 .workflowy-daily-pane.right-pane {
     flex: 0 0 40% !important;
+    position: relative !important;
 }
 
 .workflowy-daily-divider {
@@ -84,12 +81,12 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 }
 
 .workflowy-daily-pane.right-pane {
-    padding-top: 48px !important;
+    padding-top: 0 !important;
 }
 
 .workflowy-daily-pane iframe {
     width: 100% !important;
-    height: 100% !important;
+    height: calc(100% - 48px) !important;
     border: none !important;
     background: var(--wf-background) !important;
     display: block !important;
