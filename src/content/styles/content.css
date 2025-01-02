@@ -1,0 +1,198 @@
+/* Main content styles */
+
+/* Extension state */
+body.workflowy-daily-active {
+  overflow: hidden;
+}
+
+/* Layout */
+.workflowy-daily-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: white;
+  z-index: 1000;
+}
+
+.workflowy-daily-pane {
+  position: relative;
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.workflowy-daily-pane iframe {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Divider */
+.workflowy-daily-divider {
+  width: 4px;
+  background: #e0e0e0;
+  cursor: col-resize;
+  transition: background-color 0.2s;
+}
+
+.workflowy-daily-divider:hover,
+.workflowy-daily-divider.dragging {
+  background: #90caf9;
+}
+
+/* Header */
+.workflowy-daily-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  gap: 10px;
+}
+
+/* Calendar */
+.daily-calendar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-button {
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: #666;
+}
+
+.calendar-button:hover {
+  color: #000;
+}
+
+.calendar-popup {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calendar-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.weekday {
+  text-align: center;
+  font-weight: bold;
+  padding: 5px;
+}
+
+.calendar-day {
+  text-align: center;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.calendar-day:hover {
+  background-color: #f0f0f0;
+}
+
+.calendar-day.empty {
+  cursor: default;
+}
+
+.calendar-day.current-day {
+  background-color: #e0e0e0;
+}
+
+.calendar-day.selected-day {
+  background-color: #90EE90;
+}
+
+/* Date Grid */
+.daily-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  flex: 1;
+}
+
+.daily-date-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.daily-date-cell:hover {
+  background-color: #f0f0f0;
+}
+
+.daily-date-cell.active {
+  background-color: #90EE90;
+}
+
+.daily-date-cell .day {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.daily-date-cell .date {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+/* Navigation */
+.daily-nav-arrow {
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.daily-nav-arrow:hover {
+  color: #000;
+}
+
+/* Workflowy Integration */
+.project.sent {
+  animation: flash 0.5s;
+}
+
+@keyframes flash {
+  0% { background-color: transparent; }
+  50% { background-color: #90EE90; }
+  100% { background-color: transparent; }
+}

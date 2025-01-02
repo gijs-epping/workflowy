@@ -25,8 +25,8 @@
         "https://workflowy.com/*",
         "http://workflowy.com/*"
       ],
-      "css": ["content/content.css"],
-      "js": ["content/content.js"],
+      "css": ["src/content/styles/content.css"],
+      "js": ["src/content/content.js"],
       "run_at": "document_start"
     },
     {
@@ -34,9 +34,19 @@
         "https://workflowy.com/*",
         "http://workflowy.com/*"
       ],
-      "js": ["content/paste-handler.js"],
+      "js": ["src/content/utils/paste-handler.js"],
       "all_frames": true,
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/content/*.js",
+        "src/content/*/*.js",
+        "src/content/*/*/*.js"
+      ],
+      "matches": ["https://workflowy.com/*", "http://workflowy.com/*"]
     }
   ],
   "background": {
