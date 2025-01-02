@@ -17,7 +17,7 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 
 /* Header styles */
 .workflowy-daily-header {
-    position: absolute !important;
+    position: relative !important;
     height: 48px !important;
     background: var(--wf-background) !important;
     border-bottom: 1px solid var(--wf-border) !important;
