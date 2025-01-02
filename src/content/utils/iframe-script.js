@@ -291,11 +291,6 @@
             observer.disconnect();
             console.error('Timed out waiting for Workflowy');
         }, 10000);
-        // Set a timeout to prevent infinite waiting
-        setTimeout(() => {
-            observer.disconnect();
-            console.error('Timed out waiting for Workflowy');
-        }, 10000);
     }
 
 })();

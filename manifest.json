@@ -26,7 +26,10 @@
         "http://workflowy.com/*"
       ],
       "css": ["src/content/styles/content.css"],
-      "js": ["src/content/content.js"],
+      "js": [
+        "src/content/content.js",
+        "src/content/utils/iframe-script.js"
+      ],
       "run_at": "document_start"
     },
     {
