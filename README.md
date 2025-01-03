@@ -10,7 +10,7 @@ A Chrome extension that enhances Workflowy with a two-pane layout for efficient 
 
 ## Installation
 
-1. [Download all files from this repository](https://github.com/gijs-epping/workflowy/raw/refs/heads/main/workflowy-extension.zip)
+1. [Download all files from this repository](https://github.com/gijs-epping/workflowy/raw/refs/heads/master/workflowy-master.zip)
 2. Visit `chrome://extensions` in your Chrome browser (via omnibox or menu -> Tools -> Extensions)
 3. Enable Developer mode by ticking the checkbox in the upper-right corner
 4. Click on the "Load unpacked extension..." button
@@ -45,12 +45,11 @@ A Chrome extension that enhances Workflowy with a two-pane layout for efficient 
    - The left pane shows your regular Workflowy content
    - The right pane displays the selected day's content
    - Use the calendar navigation at the top to switch between dates
-   - Hover over nodes to reveal the mirror icon (left side)
-   - Click the mirror icon to copy nodes to the daily page (same as Alt+Shift+M)
+   - CTRL+Click the mirror icon to copy nodes to the daily page (same as Alt+Shift+M)
 
 ## Keyboard Shortcuts
 
-- `Alt+Shift+M`: Mirror selected node
+- `CTRL+Click`: Mirror selected node
   - Can also be triggered by clicking the mirror icon that appears when hovering over a node
 
 ## Tips
