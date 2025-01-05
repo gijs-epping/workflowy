@@ -25,10 +25,10 @@ export class SplitPane {
       this.leftIframe = document.createElement('iframe');
       this.leftPane.appendChild(this.leftIframe);
 
-      // Create divider
+      // Create divider with handle
       this.divider = document.createElement('div');
       this.divider.className = 'workflowy-daily-divider';
-      this.divider.innerHTML = ''; // Ensure element is not self-closing
+      this.divider.innerHTML = '<div class="workflowy-daily-handle"></div>';
       this.setupDragHandling();
 
       // Create right pane
@@ -82,39 +82,51 @@ export class SplitPane {
       startX = e.clientX;
       startLeftWidth = this.leftPane.getBoundingClientRect().width;
       
-      // Prevent text selection while dragging
+      // Lock cursor and prevent text selection
       document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'col-resize';
+      document.body.style.pointerEvents = 'none';
       
+      // Add event listeners to document
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     };
 
     const onMouseMove = (e) => {
       if (!isDragging) return;
-      e.preventDefault();
-
+      
       const delta = e.clientX - startX;
       const containerWidth = this.container.getBoundingClientRect().width;
       const newLeftWidth = ((startLeftWidth + delta) / containerWidth) * 100;
 
-      // Limit the resize between 30% and 70%
-      if (newLeftWidth >= 30 && newLeftWidth <= 70) {
-        requestAnimationFrame(() => {
-          this.leftPane.style.setProperty('flex', `0 0 ${newLeftWidth}%`, 'important');
-          this.rightPane.style.setProperty('flex', `0 0 ${100 - newLeftWidth}%`, 'important');
-        });
-      }
+      // Limit the resize between 20% and 80%
+      const clampedWidth = Math.max(20, Math.min(80, newLeftWidth));
+      
+      requestAnimationFrame(() => {
+        this.leftPane.style.setProperty('flex', `0 0 ${clampedWidth}%`, 'important');
+        this.rightPane.style.setProperty('flex', `0 0 ${100 - clampedWidth}%`, 'important');
+      });
     };
 
     const onMouseUp = (e) => {
-      e.preventDefault();
+      if (!isDragging) return;
+      
       isDragging = false;
       this.divider.classList.remove('dragging');
+      
+      // Restore cursor and pointer events
       document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      document.body.style.pointerEvents = '';
+      
+      // Clean up event listeners
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
 
+    // Add event listeners to document instead of just divider
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
     this.divider.addEventListener('mousedown', onMouseDown);
     this.divider.addEventListener('dragstart', (e) => e.preventDefault());
   }

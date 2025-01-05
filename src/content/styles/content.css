@@ -59,10 +59,8 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
 .workflowy-daily-divider {
     width: 8px !important;
     background: #e0e0e0 !important;
-    cursor: col-resize !important;
     position: relative !important;
     z-index: 2147483646 !important;
-    transition: background-color 0.2s ease !important;
     border-left: 1px solid #ccc !important;
     border-right: 1px solid #ccc !important;
     margin: 0 -1px !important;
@@ -72,12 +70,30 @@ body.workflowy-daily-active > *:not(.workflowy-daily-container):not(.workflowy-d
     touch-action: none !important;
 }
 
-.workflowy-daily-divider:hover {
-    background: #d0d0d0 !important;
-}
-
 .workflowy-daily-divider.dragging {
     background: #c0c0c0 !important;
+}
+
+.workflowy-daily-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 48px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    cursor: col-resize;
+    transition: background-color 0.2s ease;
+    border: 1px solid #ccc;
+}
+
+.workflowy-daily-handle:hover {
+    background: #d0d0d0;
+}
+
+.workflowy-daily-divider.dragging .workflowy-daily-handle {
+    background: #c0c0c0;
 }
 
 .workflowy-daily-pane.right-pane {
